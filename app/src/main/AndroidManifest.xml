@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.openwasher.app">
+    package="com.openwasher.app"
+    android:versionCode="1"
+    android:versionName="1.0.0">
+
+    <!-- SDK Requirements (API 24 to API 34 Android 14) -->
+    <uses-sdk
+        android:minSdkVersion="24"
+        android:targetSdkVersion="34" />
 
     <!-- Permissions for BLE Appliance Communication -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
@@ -8,6 +15,7 @@
     <uses-permission android:name="android.permission.BLUETOOTH_SCAN" android:usesPermissionFlags="neverForLocation" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     
     <!-- Camera for QR Scanning -->
     <uses-permission android:name="android.permission.CAMERA" />
@@ -15,6 +23,14 @@
     <!-- Vibrate & Wake for Cycle Finished Alerts -->
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <supports-screens
+        android:anyDensity="true"
+        android:largeScreens="true"
+        android:normalScreens="true"
+        android:resizeable="true"
+        android:smallScreens="true"
+        android:xlargeScreens="true" />
 
     <application
         android:allowBackup="true"
