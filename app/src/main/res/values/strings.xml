@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">OpenWasher</string>
+    <string name="tagline">Smart Laundry &amp; Appliance Companion</string>
+    
+    <!-- Home -->
+    <string name="scan_machine">Scan Machine QR</string>
+    <string name="enter_code">Enter Machine Code</string>
+    <string name="nearby_appliances">Nearby Smart Appliances</string>
+    <string name="quick_wash">Quick Wash</string>
+    <string name="standard_wash">Standard Cotton</string>
+    <string name="heavy_duty">Heavy Duty</string>
+    <string name="delicates">Delicates &amp; Wool</string>
+    <string name="shoes_clean">Shoes Cleaning</string>
+    <string name="air_dry">Hot Air Dry</string>
+    
+    <!-- Controls -->
+    <string name="start_cycle">Start Wash Cycle</string>
+    <string name="pause_cycle">Pause</string>
+    <string name="resume_cycle">Resume</string>
+    <string name="stop_cycle">Emergency Stop</string>
+    
+    <!-- Payment & Community -->
+    <string name="free_wash_title">Community / Free Wash</string>
+    <string name="free_wash_desc">Use appliance at zero cost. Supported by community initiatives.</string>
+    <string name="voluntary_contrib">Voluntary Contribution</string>
+    <string name="custom_tip_desc">Support laundromat maintenance and power if you wish.</string>
+    <string name="promo_code">Promo / Coupon Code</string>
+    <string name="zero_cost">₹ 0 (Free)</string>
+    
+    <!-- Status -->
+    <string name="status_idle">Machine Ready</string>
+    <string name="status_filling">Filling Water…</string>
+    <string name="status_washing">Active Wash Cycle</string>
+    <string name="status_rinsing">Rinsing Clothes…</string>
+    <string name="status_spinning">High Speed Spin…</string>
+    <string name="status_completed">Cycle Finished! Please unload.</string>
+</resources>
