@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:layout_marginBottom="24dp">
+        android:layout_marginBottom="20dp">
 
         <Button
             android:id="@+id/btnBack"
@@ -27,133 +27,131 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Connect Appliance"
+            android:text="Connect Haier Appliance"
             android:textColor="@color/text_primary"
-            android:textSize="20sp"
+            android:textSize="18sp"
             android:textStyle="bold"
             android:gravity="center"
             android:layout_marginEnd="44dp" />
     </LinearLayout>
 
-    <!-- Scanner Target Visual Box -->
+    <!-- BLE Live Scan Button & Status -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="220dp"
+        android:layout_height="wrap_content"
         android:background="@drawable/bg_card_rounded"
         android:orientation="vertical"
-        android:gravity="center"
-        android:padding="20dp"
-        android:layout_marginBottom="24dp">
+        android:padding="16dp"
+        android:layout_marginBottom="16dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Bluetooth LE Radar"
+                android:textColor="@color/text_primary"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <ProgressBar
+                android:id="@+id/pbScanning"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:visibility="gone" />
+        </LinearLayout>
 
         <TextView
+            android:id="@+id/tvScanStatus"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="📷"
-            android:textSize="44sp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Point camera at washer QR code"
-            android:textColor="@color/text_primary"
-            android:textSize="15sp"
-            android:textStyle="bold"
-            android:layout_marginTop="8dp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Locate QR code sticker on the front or lid of the washing machine"
+            android:text="Tap below to discover live Haier washers &amp; dryers nearby."
             android:textColor="@color/text_secondary"
             android:textSize="12sp"
-            android:gravity="center"
-            android:layout_marginTop="4dp" />
-    </LinearLayout>
-
-    <!-- Manual Machine Code Card -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@drawable/bg_card_rounded"
-        android:orientation="vertical"
-        android:padding="18dp"
-        android:layout_marginBottom="20dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Or Enter Machine ID"
-            android:textColor="@color/text_primary"
-            android:textSize="15sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Enter the number or code printed on the appliance"
-            android:textColor="@color/text_muted"
-            android:textSize="12sp"
+            android:layout_marginTop="4dp"
             android:layout_marginBottom="12dp" />
 
-        <EditText
-            android:id="@+id/etMachineCode"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:background="@drawable/bg_input_field"
-            android:hint="e.g. WASHER-01 or 1042"
-            android:textColorHint="@color/text_muted"
-            android:textColor="@color/text_primary"
-            android:textSize="16sp"
-            android:paddingHorizontal="16dp"
-            android:singleLine="true" />
-
         <Button
-            android:id="@+id/btnConnectManual"
+            android:id="@+id/btnStartBleScan"
             android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:text="Connect &amp; Configure Wash"
+            android:layout_height="46dp"
+            android:text="🔍  Scan for Live Haier Machines"
             android:textColor="@color/white"
-            android:textSize="15sp"
+            android:textSize="14sp"
             android:textStyle="bold"
-            android:background="@drawable/bg_button_primary"
-            android:layout_marginTop="14dp" />
+            android:background="@drawable/bg_button_primary" />
     </LinearLayout>
 
-    <!-- Quick Presets -->
+    <!-- Discovered Devices List -->
     <TextView
+        android:id="@+id/tvListHeader"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Available Nearby Units"
+        android:text="Discovered Appliances"
         android:textColor="@color/text_secondary"
         android:textSize="13sp"
         android:layout_marginBottom="8dp" />
 
+    <ListView
+        android:id="@+id/lvDiscovered"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="@color/divider"
+        android:dividerHeight="6dp"
+        android:layout_marginBottom="16dp" />
+
+    <!-- Manual Code Fallback -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:background="@drawable/bg_card_rounded"
+        android:orientation="vertical"
+        android:padding="14dp">
 
-        <Button
-            android:id="@+id/btnPresetWasher1"
-            android:layout_width="0dp"
-            android:layout_height="44dp"
-            android:layout_weight="1"
-            android:text="Washer #01"
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Or Enter Machine ID / BLE MAC"
             android:textColor="@color/text_primary"
             android:textSize="13sp"
-            android:background="@drawable/bg_button_secondary"
-            android:layout_marginEnd="6dp" />
+            android:textStyle="bold" />
 
-        <Button
-            android:id="@+id/btnPresetDryer"
-            android:layout_width="0dp"
-            android:layout_height="44dp"
-            android:layout_weight="1"
-            android:text="Dryer #02"
-            android:textColor="@color/text_primary"
-            android:textSize="13sp"
-            android:background="@drawable/bg_button_secondary"
-            android:layout_marginStart="6dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <EditText
+                android:id="@+id/etMachineCode"
+                android:layout_width="0dp"
+                android:layout_height="46dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_input_field"
+                android:hint="e.g. WASHER-01 or MAC"
+                android:textColorHint="@color/text_muted"
+                android:textColor="@color/text_primary"
+                android:textSize="14sp"
+                android:paddingHorizontal="14dp"
+                android:singleLine="true" />
+
+            <Button
+                android:id="@+id/btnConnectManual"
+                android:layout_width="wrap_content"
+                android:layout_height="46dp"
+                android:text="Connect"
+                android:textColor="@color/white"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:background="@drawable/bg_button_secondary"
+                android:layout_marginStart="8dp" />
+        </LinearLayout>
     </LinearLayout>
 
 </LinearLayout>
