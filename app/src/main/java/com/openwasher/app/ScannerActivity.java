@@ -1,50 +1,28 @@
 package com.openwasher.app;
 
 import android.app.Activity;
-import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ListView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 import com.openwasher.app.ble.BleManager;
 import com.openwasher.app.model.MachineDevice;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ScannerActivity extends Activity {
 
     private EditText etMachineCode;
-    private TextView tvScanStatus;
-    private ProgressBar pbScanning;
-    private Button btnStartBleScan;
-    private ListView lvDiscovered;
-
-    private DeviceListAdapter adapter;
-    private List<DiscoveredItem> discoveredList = new ArrayList<>();
-
-    private static class DiscoveredItem {
-        String name;
-        String address;
-        int rssi;
-        boolean isHaier;
-
-        DiscoveredItem(String name, String address, int rssi, boolean isHaier) {
-            this.name = name;
-            this.address = address;
-            this.rssi = rssi;
-            this.isHaier = isHaier;
-        }
-    }
+    private LinearLayout llDiscoveredDevices;
+    private ProgressBar pbBleScanning;
+    private TextView tvBleStatus;
+    private Set<String> discoveredMacs = new HashSet<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,14 +31,10 @@ public class ScannerActivity extends Activity {
 
         Button btnBack = findViewById(R.id.btnBack);
         etMachineCode = findViewById(R.id.etMachineCode);
-        tvScanStatus = findViewById(R.id.tvScanStatus);
-        pbScanning = findViewById(R.id.pbScanning);
-        btnStartBleScan = findViewById(R.id.btnStartBleScan);
-        lvDiscovered = findViewById(R.id.lvDiscovered);
         Button btnConnectManual = findViewById(R.id.btnConnectManual);
-
-        adapter = new DeviceListAdapter();
-        lvDiscovered.setAdapter(adapter);
+        llDiscoveredDevices = findViewById(R.id.llDiscoveredDevices);
+        pbBleScanning = findViewById(R.id.pbBleScanning);
+        tvBleStatus = findViewById(R.id.tvBleStatus);
 
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -69,118 +43,118 @@ public class ScannerActivity extends Activity {
             }
         });
 
-        // Seed with preset Haier machines if none found yet
-        discoveredList.add(new DiscoveredItem("Haier Smart Washer #01 (BLE Demo)", "SIMULATED", -52, true));
-        discoveredList.add(new DiscoveredItem("Haier Commercial Dryer #02 (BLE Demo)", "SIMULATED", -68, true));
-        adapter.notifyDataSetChanged();
-
-        btnStartBleScan.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startScanning();
-            }
-        });
-
-        lvDiscovered.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                DiscoveredItem item = discoveredList.get(position);
-                proceedWithMachine(item.address, item.name);
-            }
-        });
-
         btnConnectManual.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 String code = etMachineCode.getText().toString().trim();
                 if (TextUtils.isEmpty(code)) {
-                    Toast.makeText(ScannerActivity.this, "Please enter a machine ID or MAC address", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(ScannerActivity.this, "Please enter a machine ID or MAC", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                proceedWithMachine(code, "Appliance " + code);
+                proceedWithMachine(code, "Haier Appliance " + code, code);
             }
         });
 
-        // Automatically start live scan on open
-        startScanning();
+        startBleApplianceScan();
     }
 
-    private void startScanning() {
-        pbScanning.setVisibility(View.VISIBLE);
-        tvScanStatus.setText("Scanning for Bluetooth Low Energy appliances (10s)...");
-        btnStartBleScan.setEnabled(false);
+    private void startBleApplianceScan() {
+        discoveredMacs.clear();
+        llDiscoveredDevices.removeAllViews();
+        pbBleScanning.setVisibility(View.VISIBLE);
+        tvBleStatus.setText("Scanning for Haier BLE signals within 10m…");
 
-        BleManager.getInstance(this).startLeScan(new BleManager.ScanDeviceListener() {
+        BleManager.getInstance(this).startScan(new BleManager.DeviceDiscoveryListener() {
             @Override
-            public void onDeviceFound(BluetoothDevice device, int rssi, String name) {
-                String devName = name != null ? name : "Device";
-                boolean isHaier = devName.toLowerCase().contains("haier") ||
-                                  devName.toLowerCase().contains("washer") ||
-                                  devName.toLowerCase().contains("dryer") ||
-                                  devName.toLowerCase().contains("sw_") ||
-                                  devName.toLowerCase().contains("uplug");
-
-                // Check if already in list
-                boolean exists = false;
-                for (DiscoveredItem it : discoveredList) {
-                    if (it.address.equalsIgnoreCase(device.getAddress())) {
-                        it.rssi = rssi;
-                        it.name = devName;
-                        exists = true;
-                        break;
+            public void onDeviceFound(final MachineDevice device, final int rssi) {
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        addDiscoveredDeviceCard(device, rssi);
                     }
-                }
-                if (!exists) {
-                    discoveredList.add(0, new DiscoveredItem(devName, device.getAddress(), rssi, isHaier));
-                }
-                adapter.notifyDataSetChanged();
+                });
             }
 
             @Override
             public void onScanFinished() {
-                pbScanning.setVisibility(View.GONE);
-                btnStartBleScan.setEnabled(true);
-                tvScanStatus.setText("Scan completed. Tap an appliance to connect.");
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        pbBleScanning.setVisibility(View.GONE);
+                        if (discoveredMacs.isEmpty()) {
+                            tvBleStatus.setText("Scan complete. No nearby signals detected.");
+                        } else {
+                            tvBleStatus.setText("Found " + discoveredMacs.size() + " nearby smart appliance(s)");
+                        }
+                    }
+                });
             }
-        }, 10000);
+        });
     }
 
-    private void proceedWithMachine(String address, String name) {
-        String type = name.toLowerCase().contains("dryer") ? "DRYER" : "WASHER";
-        MachineDevice device = new MachineDevice(address, name, type, address, true);
+    private void addDiscoveredDeviceCard(final MachineDevice device, int rssi) {
+        if (discoveredMacs.contains(device.getBleAddress())) {
+            return;
+        }
+        discoveredMacs.add(device.getBleAddress());
+
+        LinearLayout item = new LinearLayout(this);
+        item.setOrientation(LinearLayout.HORIZONTAL);
+        item.setBackgroundResource(R.drawable.bg_card_rounded);
+        item.setPadding(28, 24, 28, 24);
+        LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lp.setMargins(0, 0, 0, 16);
+        item.setLayoutParams(lp);
+
+        LinearLayout textCol = new LinearLayout(this);
+        textCol.setOrientation(LinearLayout.VERTICAL);
+        LinearLayout.LayoutParams textLp = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f);
+        textCol.setLayoutParams(textLp);
+
+        TextView tvName = new TextView(this);
+        tvName.setText(device.getName());
+        tvName.setTextColor(getResources().getColor(R.color.text_primary));
+        tvName.setTextSize(15);
+        tvName.setTypeface(null, android.graphics.Typeface.BOLD);
+
+        TextView tvSub = new TextView(this);
+        tvSub.setText("MAC: " + device.getBleAddress() + " • Signal: " + rssi + " dBm");
+        tvSub.setTextColor(getResources().getColor(R.color.accent));
+        tvSub.setTextSize(12);
+
+        textCol.addView(tvName);
+        textCol.addView(tvSub);
+
+        Button btnConnect = new Button(this);
+        btnConnect.setText("Connect");
+        btnConnect.setTextColor(getResources().getColor(R.color.white));
+        btnConnect.setBackgroundResource(R.drawable.bg_button_primary);
+        btnConnect.setPadding(32, 0, 32, 0);
+        btnConnect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                proceedWithMachine(device.getId(), device.getName(), device.getBleAddress());
+            }
+        });
+
+        item.addView(textCol);
+        item.addView(btnConnect);
+        llDiscoveredDevices.addView(item);
+    }
+
+    private void proceedWithMachine(String id, String name, String bleAddress) {
+        BleManager.getInstance(this).stopScan();
+        MachineDevice device = new MachineDevice(id, name, "WASHER", bleAddress, true);
         Intent intent = new Intent(ScannerActivity.this, WashControlActivity.class);
         intent.putExtra("device", device);
         startActivity(intent);
         finish();
     }
 
-    private class DeviceListAdapter extends BaseAdapter {
-        @Override
-        public int getCount() { return discoveredList.size(); }
-        @Override
-        public Object getItem(int pos) { return discoveredList.get(pos); }
-        @Override
-        public long getItemId(int pos) { return pos; }
-
-        @Override
-        public View getView(int pos, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = LayoutInflater.from(ScannerActivity.this).inflate(R.layout.item_history, parent, false);
-            }
-            DiscoveredItem item = discoveredList.get(pos);
-
-            TextView tvName = convertView.findViewById(R.id.tvHistoryProgram);
-            TextView tvBadge = convertView.findViewById(R.id.tvHistoryCost);
-            TextView tvMac = convertView.findViewById(R.id.tvHistoryMachine);
-            TextView tvRssi = convertView.findViewById(R.id.tvHistoryDate);
-
-            tvName.setText((item.isHaier ? "🧺 " : "📡 ") + item.name);
-            tvBadge.setText(item.isHaier ? "HAIER BLE" : "BLUETOOTH");
-            tvBadge.setTextColor(getResources().getColor(item.isHaier ? R.color.accent_glow : R.color.text_muted));
-            tvMac.setText("MAC / ID: " + item.address);
-            tvRssi.setText("Signal: " + item.rssi + " dBm");
-
-            return convertView;
-        }
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        BleManager.getInstance(this).stopScan();
     }
 }
